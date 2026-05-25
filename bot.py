@@ -25,7 +25,7 @@ def run_server():
     HTTPServer(('0.0.0.0', 10000), Handler).serve_forever()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("你好！直接发消息开聊~\n/model 切换模型\n/clear 清空对话")
+    await update.message.reply_text("直接发消息。\n/model 切换模型\n/clear 清空对话")
 
 async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
