@@ -1,4 +1,6 @@
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from openai import OpenAI
@@ -7,13 +9,20 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 API_KEY = os.environ.get("API_KEY")
 API_BASE_URL = os.environ.get("API_BASE_URL", "https://api.chr6.com/v1")
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", "[xy6-按量计费]claude-opus-4-6-thinking")
-
-MODELS = [
-    "[xy6-按量计费]claude-opus-4-6-thinking",
-]
-
+MODELS = ["[xy6-按量计费]claude-opus-4-6-thinking"]
 client = OpenAI(api_key=API_KEY, base_url=API_BASE_URL)
 user_data = {}
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'ok')
+    def log_message(self, format, *args):
+        pass
+
+def run_server():
+    HTTPServer(('0.0.0.0', 10000), Handler).serve_forever()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("你好！直接发消息开聊~\n/model 切换模型\n/clear 清空对话")
@@ -59,6 +68,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.edit_text(f"出错了：{str(e)}")
 
 def main():
+    threading.Thread(target=run_server, daemon=True).start()
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("clear", clear))
@@ -69,4 +79,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
