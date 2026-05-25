@@ -40,7 +40,7 @@ async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def memory_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     try:
-        memories = mem0.get_all(user_id=user_id)
+        memories = mem0.get_all(filters={"user_id": user_id})
         if not memories:
             await update.message.reply_text("还没有长期记忆~")
             return
