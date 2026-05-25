@@ -40,7 +40,11 @@ async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def memory_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     try:
-        memories = mem0.get_all(filters={"user_id": user_id})
+        result = mem0.get_all(filters={"user_id": user_id})
+        if isinstance(result, dict):
+            memories = result.get("results", [])
+        else:
+            memories = list(result) if result else []
         if not memories:
             await update.message.reply_text("还没有长期记忆~")
             return
@@ -75,6 +79,8 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         memories = mem0.search(user_message, user_id=user_id, limit=5)
+        if isinstance(memories, dict):
+            memories = memories.get("results", [])
         memory_text = "\n".join([m['memory'] for m in memories]) if memories else ""
     except:
         memory_text = ""
